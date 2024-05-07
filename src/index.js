@@ -3,28 +3,35 @@ const readCSV = require('./csvReader');
 
 async function executeSELECTQuery(query) {
     try {
-        const { fields, table, whereClause } = parseQuery(query);
+        const { fields, table, whereClauses } = parseQuery(query);
         const data = await readCSV(`${table}.csv`);
 
-        // Filtering based on WHERE clause
-        const filteredData = whereClause
-            ? data.filter(row => {
-                const [field, value] = whereClause.split('=').map(s => s.trim());
-                return row[field] === value;
-            })
+        // Apply WHERE clause filtering
+        const filteredData = whereClauses.length > 0
+            ? applyWhereClause(data, whereClauses)
             : data;
 
-        // Selecting the specified fields
-        return filteredData.map(row => {
-            const selectedRow = {};
-            fields.forEach(field => {
-                selectedRow[field] = row[field];
-            });
-            return selectedRow;
-        });
+        // Select the specified fields
+        return selectFields(filteredData, fields);
     } catch (error) {
-        throw new Error(error.message);
+        throw new Error(`Error executing SELECT query: ${error.message}`);
     }
+}
+
+function applyWhereClause(data, whereClauses) {
+    return data.filter(row => whereClauses.every(clause => {
+        return row[clause.field] === clause.value;
+    }));
+}
+
+function selectFields(data, fields) {
+    return data.map(row => {
+        const selectedRow = {};
+        fields.forEach(field => {
+            selectedRow[field] = row[field];
+        });
+        return selectedRow;
+    });
 }
 
 module.exports = executeSELECTQuery;
