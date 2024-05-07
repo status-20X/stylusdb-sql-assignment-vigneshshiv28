@@ -1,31 +1,19 @@
-/*function parseQuery(query) {
+function parseQuery(query) {
     const selectRegex = /SELECT (.+?) FROM (.+?)(?: WHERE (.*))?$/i;
     const match = query.match(selectRegex);
 
-    if (match) {
-        const [, fields, table, whereString] = match;
-        const whereClauses = whereString ? parseWhereClause(whereString) : [];
-        return {
-            fields: fields.split(',').map(field => field.trim()),
-            table: table.trim(),
-            whereClauses
-        };
-    } else {
+    if (!match) {
         throw new Error('Invalid query format');
     }
+
+    const [, fields, table, whereClause] = match;
+    const parsedQuery = {
+        fields: fields.split(',').map(field => field.trim()),
+        table: table.trim(),
+        whereClause: whereClause ? whereClause.trim() : null
+    };
+
+    return parsedQuery;
 }
 
-function parseWhereClause(whereString) {
-    //No where clause
-    if (!whereString || whereString.trim() === '') {
-        return []; 
-    }
-
-    const conditions = whereString.split(/ AND | OR /i);
-    return conditions.map(condition => {
-        const [field, operator, value] = condition.split(/\s+/);
-        return { field, operator, value };
-    });
-}
-
-module.exports = parseQuery;*/
+module.exports = parseQuery;

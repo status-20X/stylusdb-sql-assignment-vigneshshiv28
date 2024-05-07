@@ -14,6 +14,12 @@ test('Parse SQL Query', () => {
     const parsed = parseQuery(query);
     expect(parsed).toEqual({
         fields: ['id', 'name'],
-        table: 'sample'
+        table: 'sample',
+        whereClause: null,
     });
+});
+
+test('Invalid Query Format', () => {
+    const query = 'SELECT * FROM ';
+    expect(() => parseQuery(query)).toThrow('Invalid query format');
 });
